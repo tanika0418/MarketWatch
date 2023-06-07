@@ -1,0 +1,36 @@
+name: market_watch
+description: A new Flutter project.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.18.2 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_screenutil: ^5.7.0
+  intl: ^0.18.0
+
+  websafe_svg: ^3.0.0+5
+  provider: ^6.0.5
+  firebase_database: ^10.1.0
+  firebase_core: ^2.9.0
+  firebase_auth: ^4.6.0
+  syncfusion_flutter_charts: ^21.2.3
+  excel: 2.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icons/
+    - assets/images/
+    - assets/files/
