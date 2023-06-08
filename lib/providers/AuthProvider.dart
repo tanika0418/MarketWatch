@@ -32,6 +32,31 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> signup(String email, String password, String name, String contact) async {
+    final _userProfileDBRef = FirebaseDatabase.instance.ref().child("userRef");
+    try {
+      UserCredential userCredential =
+          await firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      User? user = await userCredential.user;
+      String userId = await userCredential.user!.uid;
+        await _userProfileDBRef.child(userId).child("name").set(name);
+        await _userProfileDBRef
+            .child(userId)
+            .child("contact")
+            .set(contact);
+        // await _sessionsDBRef.child(userId).set(false);
+      _user = user;
+      _updateSession(true);
+      notifyListeners();
+    } catch (error) {
+      print("error $error");
+      rethrow;
+    }
+  }
+
   Future<void> tryAutoLogin() async {
     User? firebaseUser = await FirebaseAuth.instance.currentUser;
     if (firebaseUser == null) {

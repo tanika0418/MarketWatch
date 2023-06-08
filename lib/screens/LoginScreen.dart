@@ -20,11 +20,16 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   final _emailIdController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _contactController = TextEditingController();
+  bool _loginToggle = true;
 
   @override
   void dispose() {
     _emailIdController.dispose();
     _passwordController.dispose();
+    _nameController.dispose();
+    _contactController.dispose();
     super.dispose();
   }
 
@@ -58,6 +63,48 @@ class _LoginScreenState extends State<LoginScreen> {
         _showError(errorString.split(ExceptionString + SYSTEM_ERROR).last);
       } else {
         _showError("Something went wrong");
+      }
+    }
+  }
+
+  Future<void> _signup() async {
+    setState(() {
+      _isLoading = true;
+    });
+    final email = _emailIdController.text.trim();
+    final password = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+    final contact = _contactController.text.trim();
+
+    if (email.isEmpty) {
+      _showError("Email field is empty");
+      return;
+    } else if (password.isEmpty) {
+      _showError("Password field is empty");
+      return;
+    } else if (name.isEmpty) {
+      _showError("Name field is empty");
+      return;
+    } else if (contact.isEmpty) {
+      _showError("Contact number field is empty");
+      return;
+    }
+    try {
+      await Provider.of<AuthProvider>(context, listen: false)
+          .signup(email, password, name, contact);
+     // showMWToast(context,
+       //   message: "Account created successfully", isError: false);
+    } catch (error) {
+      var errorString = error.toString();
+      if (errorString.endsWith("(auth/email-already-in-use).")) {
+        _showError("Account already exists");
+      } else if (errorString.startsWith("(auth/invalid-email).")) {
+        _showError("The email address is badly formatted");
+      } else if (errorString.endsWith("(auth/weak-password).")) {
+        _showError("Password is not strong enough");
+      } else {
+        print(errorString);
+        _showError("something went wrong");
       }
     }
   }
@@ -100,70 +147,184 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: kDefaultPadding * 2),
+                padding: EdgeInsets.symmetric(vertical: kDefaultPadding * 1.75),
                 child: Column(
                   children: [
                     WebsafeSvg.asset(
                       "assets/icons/marketwatch-logo.svg",
                       height: 38,
                     ),
-                    SizedBox(height: kDefaultPadding * 2),
+                    SizedBox(height: kDefaultPadding * 1.5),
                     Padding(
                       padding:
                           EdgeInsets.symmetric(horizontal: kDefaultPadding * 2),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          buildInputField(
-                            name: "Username",
-                            width: _width,
-                            icon: Icons.account_circle,
-                            controller: _emailIdController,
-                          ),
-                          SizedBox(height: kDefaultPadding),
-                          buildInputField(
-                            name: "Password",
-                            width: _width,
-                            isObs: true,
-                            icon: Icons.key_rounded,
-                            controller: _passwordController,
-                          ),
-                          SizedBox(height: kDefaultPadding * 2),
-                          _isLoading
-                              ? Container(
+                      child: _loginToggle
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                buildInputField(
+                                  name: "Email ID",
                                   width: _width,
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                        color: kPrimaryColor),
-                                  ),
-                                )
-                              : InkWell(
-                                  onTap: _login,
-                                  child: Container(
-                                    width: _width,
-                                    padding:
-                                        EdgeInsets.all(kDefaultPadding * 0.75),
-                                    decoration: BoxDecoration(
-                                      color: kPrimaryColor,
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        "Login",
-                                        style: TextStyle(color: Colors.white),
+                                  icon: Icons.email,
+                                  controller: _emailIdController,
+                                ),
+                                SizedBox(height: kDefaultPadding),
+                                buildInputField(
+                                  name: "Password",
+                                  width: _width,
+                                  isObs: true,
+                                  icon: Icons.key_rounded,
+                                  controller: _passwordController,
+                                ),
+                                SizedBox(height: kDefaultPadding * 1.5),
+                                _isLoading
+                                    ? Container(
+                                        width: _width,
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                              color: kPrimaryColor),
+                                        ),
+                                      )
+                                    : InkWell(
+                                        onTap: _login,
+                                        child: Container(
+                                          width: _width,
+                                          padding: EdgeInsets.all(
+                                              kDefaultPadding * 0.75),
+                                          decoration: BoxDecoration(
+                                            color: kPrimaryColor,
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              "Login",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ).addNeumorphism(
+                                          blurRadius: 15,
+                                          borderRadius: 15,
+                                          offset: Offset(4, 4),
+                                          topShadowColor: Colors.white60,
+                                          bottomShadowColor: Color(0xFF366CF6)
+                                              .withOpacity(0.60),
+                                        ),
                                       ),
-                                    ),
-                                  ).addNeumorphism(
-                                    blurRadius: 15,
-                                    borderRadius: 15,
-                                    offset: Offset(4, 4),
-                                    topShadowColor: Colors.white60,
-                                    bottomShadowColor:
-                                        Color(0xFF366CF6).withOpacity(0.60),
+                                SizedBox(height: kDefaultPadding),
+                                Container(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text("Don't have an account? ",
+                                          style: TextStyle(color: kTextColor)),
+                                      InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            _loginToggle = false;
+                                          });
+                                        },
+                                        child: Text("Sign Up",
+                                            style: TextStyle(
+                                                color: kPrimaryColor)),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                        ],
-                      ),
+                              ],
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                buildInputField(
+                                  name: "Name",
+                                  width: _width,
+                                  icon: Icons.person,
+                                  controller: _nameController,
+                                ),
+                                SizedBox(height: kDefaultPadding * 0.75),
+                                buildInputField(
+                                  name: "Contact Number",
+                                  width: _width,
+                                  icon: Icons.call,
+                                  controller: _contactController,
+                                ),
+                                SizedBox(height: kDefaultPadding * 0.75),
+                                buildInputField(
+                                  name: "Email ID",
+                                  width: _width,
+                                  icon: Icons.email,
+                                  controller: _emailIdController,
+                                ),
+                                SizedBox(height: kDefaultPadding * 0.75),
+                                buildInputField(
+                                  name: "Password",
+                                  width: _width,
+                                  isObs: true,
+                                  icon: Icons.key_rounded,
+                                  controller: _passwordController,
+                                ),
+                                SizedBox(height: kDefaultPadding * 1.5),
+                                _isLoading
+                                    ? Container(
+                                        width: _width,
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                              color: kPrimaryColor),
+                                        ),
+                                      )
+                                    : InkWell(
+                                        onTap: _signup,
+                                        child: Container(
+                                          width: _width,
+                                          padding: EdgeInsets.all(
+                                              kDefaultPadding * 0.75),
+                                          decoration: BoxDecoration(
+                                            color: kPrimaryColor,
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              "Sign Up",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ).addNeumorphism(
+                                          blurRadius: 15,
+                                          borderRadius: 15,
+                                          offset: Offset(4, 4),
+                                          topShadowColor: Colors.white60,
+                                          bottomShadowColor: Color(0xFF366CF6)
+                                              .withOpacity(0.60),
+                                        ),
+                                      ),
+                                SizedBox(height: kDefaultPadding*0.75),
+                                Container(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text("Already have an account? ",
+                                          style: TextStyle(color: kTextColor)),
+                                      InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            _loginToggle = true;
+                                          });
+                                        },
+                                        child: Text("Login",
+                                            style: TextStyle(
+                                                color: kPrimaryColor)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                     ),
                   ],
                 ),

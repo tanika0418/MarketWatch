@@ -15,6 +15,7 @@ void main() async {
     options: const FirebaseOptions(
         apiKey: "AIzaSyBI1KWe5nVa23ZU_Cps15jRR_RQ6ym0qzc",
         authDomain: "market-watch-c162a.firebaseapp.com",
+        //authDomain:"localhost",
         projectId: "market-watch-c162a",
         storageBucket: "market-watch-c162a.appspot.com",
         messagingSenderId: "233579828457",

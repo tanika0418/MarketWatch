@@ -35,6 +35,7 @@ Widget buildInputField({
               ? null
               : Icon(
                   icon,
+                  size: 22,
                   color: kTextColor,
                 ),
           border: InputBorder.none,
